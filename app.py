@@ -27,8 +27,12 @@ GITHUB_REPO = "girltrek-dashboard-data"
 
 # GitHub API configurations - to be stored in secrets.toml in production
 # These would be set in Streamlit's secrets manager for security
-if 'github_token' not in st.secrets:
-    st.secrets['github_token'] = os.getenv('GITHUB_TOKEN', '')
+# Get token from secrets or environment variable
+def get_github_token():
+    if 'github_token' in st.secrets:
+        return st.secrets['github_token']
+    else:
+        return os.getenv('GITHUB_TOKEN', '')
 
 # Create data directory if it doesn't exist
 if not os.path.exists(DATA_DIR):
@@ -120,9 +124,10 @@ def load_auth_config():
 # GitHub data operations
 def init_github():
     """Initialize GitHub connection"""
-    if st.secrets['github_token']:
+    github_token = get_github_token()
+    if github_token:
         try:
-            return Github(st.secrets['github_token'])
+            return Github(github_token)
         except Exception as e:
             st.error(f"Error connecting to GitHub: {e}")
             return None
