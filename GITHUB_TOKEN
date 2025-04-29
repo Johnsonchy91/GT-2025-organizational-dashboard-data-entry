@@ -1,2 +1,0 @@
-export GITHUB_TOKEN="your-actual-token-here"
-streamlit run app.py
