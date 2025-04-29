@@ -9,8 +9,8 @@ from datetime import datetime
 import requests
 from github import Github
 import yaml
-import streamlit_authenticator as stauth
 import re
+from streamlit_authenticator.hasher import Hasher
 
 # Set page config
 st.set_page_config(
@@ -27,7 +27,6 @@ GITHUB_REPO = "girltrek-dashboard-data"
 
 # GitHub API configurations - to be stored in secrets.toml in production
 # These would be set in Streamlit's secrets manager for security
-# Get token from secrets or environment variable
 def get_github_token():
     if 'github_token' in st.secrets:
         return st.secrets['github_token']
@@ -95,14 +94,13 @@ def load_auth_config():
             config = yaml.load(file, Loader=yaml.SafeLoader)
     else:
         # Create a default configuration with a single admin user
-        # In production, this should be done through a secure admin interface
         config = {
             'credentials': {
                 'usernames': {
                     'admin': {
                         'email': 'admin@girltrek.org',
                         'name': 'GirlTREK Admin',
-                        'password': stauth.Hasher(['admin']).generate()[0]  # Default password is 'admin'
+                        'password': Hasher().hash("admin")  # Hash the password correctly
                     }
                 }
             },
@@ -623,7 +621,7 @@ def main():
                             auth_config['credentials']['usernames'][reg_username] = {
                                 'name': reg_name,
                                 'email': reg_email,
-                                'password': stauth.Hasher([reg_password]).generate()[0]
+                                'password': Hasher().hash(reg_password)
                             }
                             
                             # Add to preauthorized emails
